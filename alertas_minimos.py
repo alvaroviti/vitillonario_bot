@@ -85,10 +85,12 @@ def metricas(hist):
     for etiqueta, dias in HORIZONTES:
         desde = fecha - timedelta(days=dias)
         if hist.index[0] > desde + timedelta(days=10):
-            horizontes.append((etiqueta, None, None))
+            horizontes.append((etiqueta, None, None, None))
             continue
         tramo = hist[hist.index >= desde]
-        horizontes.append((etiqueta, precio / float(tramo.max()) - 1, precio / float(tramo.min()) - 1))
+        tmin, tmax = float(tramo.min()), float(tramo.max())
+        pos = (precio - tmin) / (tmax - tmin) if tmax > tmin else 1.0
+        horizontes.append((etiqueta, precio / tmax - 1, precio / tmin - 1, pos))
     return {
         "fecha": fecha,
         "precio": precio,
@@ -130,6 +132,19 @@ def enviar(texto):
     r.raise_for_status()
 
 
+def enviar_bloques(cabecera, bloques, pie=None, limite=3800):
+    """Agrupa bloques en mensajes de menos de `limite` caracteres sin partir ningún activo."""
+    partes = [cabecera] + bloques + ([pie] if pie else [])
+    mensaje = ""
+    for parte in partes:
+        if mensaje and len(mensaje) + len(parte) + 2 > limite:
+            enviar(mensaje)
+            mensaje = ""
+        mensaje = f"{mensaje}\n\n{parte}" if mensaje else parte
+    if mensaje:
+        enviar(mensaje)
+
+
 def recoger():
     datos, avisos = [], []
     for nombre, cubre, t_alerta, t_resumen in ACTIVOS:
@@ -159,10 +174,8 @@ def modo_alertas(datos, avisos):
     if not alertas:
         print("Sin alertas hoy.")
         return
-    texto = "<b>Oportunidades por mínimos</b>\n\n" + "\n\n".join(alertas)
-    if avisos:
-        texto += "\n\n⚠️ " + html.escape("; ".join(avisos))
-    enviar(texto)
+    pie = "⚠️ " + html.escape("; ".join(avisos)) if avisos else None
+    enviar_bloques("<b>Oportunidades por mínimos</b>", alertas, pie)
 
 
 def modo_resumen(datos, avisos):
@@ -175,19 +188,17 @@ def modo_resumen(datos, avisos):
             f"<b>{html.escape(nombre)}</b> (<code>{ticker}</code>) {m['precio']:.2f}\n"
             f"   Semana: {fmt(m['var_sem'])}\n"
             f"   Mes: {fmt(m['var_mes'])}\n\n"
-            + "".join(
-                f"   {et}: máx {fmt(vmax)}{' 🔺' if vmax >= -0.0005 else ''}"
+            + "\n".join(
+                f"   <b>{et}</b>: máx {fmt(vmax)}{' 🔺' if vmax >= -0.0005 else ''}"
                 f" · mín {fmt(vmin)}{' 🔻' if vmin <= 0.0005 else ''}\n"
-                for et, vmax, vmin in m["horizontes"]
-                if vmax is not None  # sin histórico suficiente: no se muestra la línea
+                f"   mín {barra(pos)} máx"
+                for et, vmax, vmin, pos in m["horizontes"]
+                if vmax is not None  # sin histórico suficiente: no se muestra
             )
-            + f"   mín {barra(m['rango'])} máx"
         )
-    texto = "<b>📊 Resumen semanal</b>\n<i>Ordenado de más a menos caída desde el máximo anual</i>\n\n"
-    texto += "\n\n".join(bloques)
-    if avisos:
-        texto += "\n\n⚠️ " + html.escape("; ".join(avisos))
-    enviar(texto)
+    cabecera = "<b>📊 Resumen semanal</b>\n<i>Ordenado de más a menos caída desde el máximo anual</i>"
+    pie = "⚠️ " + html.escape("; ".join(avisos)) if avisos else None
+    enviar_bloques(cabecera, bloques, pie)
 
 
 def main():
