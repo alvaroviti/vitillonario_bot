@@ -13,6 +13,9 @@ from datetime import timedelta
 import pandas as pd
 import requests
 import yfinance as yf
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", message=".*inplace.*")
 
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -47,7 +50,7 @@ def analizar(ticker):
     fecha = hist.index[-1]
     ultimo = float(hist.iloc[-1])
     ultima = fecha.tz_convert(None) if fecha.tzinfo is not None else fecha
-    if (pd.Timestamp.utcnow().tz_localize(None) - ultima).days > MAX_DIAS_SIN_DATO:
+    if (pd.Timestamp.now("UTC").tz_localize(None) - ultima).days > MAX_DIAS_SIN_DATO:
         return None, f"datos antiguos para {ticker}"
 
     anual = hist[hist.index >= fecha - timedelta(days=365)]
