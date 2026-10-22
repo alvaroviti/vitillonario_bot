@@ -28,7 +28,7 @@ TG_CHAT = os.getenv("TELEGRAM_CHAT_ID")
 # De mayor a menor: si es mínimo de 12M también lo es de 6M y 3M, se informa el mayor
 VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
 UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
-HORIZONTES = [("1 año", 365), ("2 años", 730), ("3 años", 1095)]
+HORIZONTES = [("3 meses", 91), ("6 meses", 182), ("1 año", 365), ("2 años", 730), ("3 años", 1095)]
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
 
 # Cada activo: (nombre, posiciones que representa, ticker para alertas, ticker para resumen)
@@ -80,7 +80,7 @@ def metricas(hist):
 
     rango = (precio - min12) / (max12 - min12) if max12 > min12 else 1.0
 
-    # Distancia a máximo y mínimo a 1, 2 y 3 años (n/d si el histórico no llega)
+    # Distancia a máximo y mínimo por horizonte (None si el histórico no llega)
     horizontes = []
     for etiqueta, dias in HORIZONTES:
         desde = fecha - timedelta(days=dias)
@@ -176,7 +176,8 @@ def modo_resumen(datos, avisos):
             f"   Semana: {fmt(m['var_sem'])}\n"
             f"   Mes: {fmt(m['var_mes'])}\n\n"
             + "".join(
-                f"   {et}: máx {fmt(vmax)} · mín {fmt(vmin)}\n"
+                f"   {et}: máx {fmt(vmax)}{' 🔺' if vmax >= -0.0005 else ''}"
+                f" · mín {fmt(vmin)}{' 🔻' if vmin <= 0.0005 else ''}\n"
                 for et, vmax, vmin in m["horizontes"]
                 if vmax is not None  # sin histórico suficiente: no se muestra la línea
             )
