@@ -38,7 +38,7 @@ ACTIVOS = [
                                        "EUNL.DE",      "0P0001XF40.F"),
     ("Emerging Markets",              "iShares EM Index S, Index MSCI EM",
                                        "EUNM.DE",      "0P0001XF3Z.F"),
-    ("EE. UU.",                       "iShares US Index S, iShares Core S&P 500",
+    ("S&P500 iShares clase S",         "iShares US Index S, iShares Core S&P 500",
                                        "SXR8.DE",      "0P0001XF42.F"),
     ("Nasdaq 100 (EUR hedged)",       "iShares Nasdaq 100 Hedged",
                                        "NQSE.DE",      "NQSE.DE"),
