@@ -28,6 +28,7 @@ TG_CHAT = os.getenv("TELEGRAM_CHAT_ID")
 # De mayor a menor: si es mínimo de 12M también lo es de 6M y 3M, se informa el mayor
 VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
 UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
+HORIZONTES = [("1 año", 365), ("2 años", 730), ("3 años", 1095)]
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
 
 # Cada activo: (nombre, posiciones que representa, ticker para alertas, ticker para resumen)
@@ -58,7 +59,7 @@ ACTIVOS = [
 
 
 def cargar(ticker):
-    hist = yf.Ticker(ticker).history(period="13mo", interval="1d", auto_adjust=True)["Close"].dropna()
+    hist = yf.Ticker(ticker).history(period="37mo", interval="1d", auto_adjust=True)["Close"].dropna()
     if hist.empty:
         raise ValueError("sin datos")
     ultima = hist.index[-1]
@@ -78,6 +79,16 @@ def metricas(hist):
         return precio / float(previo.iloc[-1]) - 1 if not previo.empty else None
 
     rango = (precio - min12) / (max12 - min12) if max12 > min12 else 1.0
+
+    # Distancia a máximo y mínimo a 1, 2 y 3 años (n/d si el histórico no llega)
+    horizontes = []
+    for etiqueta, dias in HORIZONTES:
+        desde = fecha - timedelta(days=dias)
+        if hist.index[0] > desde + timedelta(days=10):
+            horizontes.append((etiqueta, None, None))
+            continue
+        tramo = hist[hist.index >= desde]
+        horizontes.append((etiqueta, precio / float(tramo.max()) - 1, precio / float(tramo.min()) - 1))
     return {
         "fecha": fecha,
         "precio": precio,
@@ -88,6 +99,7 @@ def metricas(hist):
         "var_sem": variacion(7),
         "var_mes": variacion(30),
         "rango": rango,
+        "horizontes": horizontes,
     }
 
 
@@ -162,9 +174,13 @@ def modo_resumen(datos, avisos):
         bloques.append(
             f"<b>{html.escape(nombre)}</b> (<code>{ticker}</code>) {m['precio']:.2f}\n"
             f"   Semana: {fmt(m['var_sem'])}\n"
-            f"   Mes: {fmt(m['var_mes'])}\n"
-            f"   vs máx 12M: {m['vs_max']:+.1%} · vs mín 12M: {m['vs_min']:+.1%}\n"
-            f"   mín {barra(m['rango'])} máx"
+            f"   Mes: {fmt(m['var_mes'])}\n\n"
+            + "".join(
+                f"   {et}: máx {fmt(vmax)} · mín {fmt(vmin)}\n"
+                for et, vmax, vmin in m["horizontes"]
+                if vmax is not None  # sin histórico suficiente: no se muestra la línea
+            )
+            + f"   mín {barra(m['rango'])} máx"
         )
     texto = "<b>📊 Resumen semanal</b>\n<i>Ordenado de más a menos caída desde el máximo anual</i>\n\n"
     texto += "\n\n".join(bloques)
