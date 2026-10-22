@@ -1,0 +1,20 @@
+name: Alertas de minimos
+
+on:
+  schedule:
+    - cron: "0 19 * * *"   # todos los días a las 19:00 UTC (tras el cierre europeo)
+  workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
+
+jobs:
+  alertas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yfinance pandas requests
+      - run: python alertas_minimos.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
