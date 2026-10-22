@@ -30,18 +30,31 @@ VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
 UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
 
-# ticker de Yahoo Finance -> (exposición, posiciones que representa)
-ACTIVOS = {
-    "EUNL.DE": ("MSCI World", "Developed World S/D, MSCI World P, Amundi Core World, MyInvestor Indexado Global PP"),
-    "EUNM.DE": ("MSCI Emerging Markets", "Vanguard EM Index S, Index MSCI EM"),
-    "SXR8.DE": ("S&P 500", "iShares Core S&P 500"),
-    "NQSE.DE": ("Nasdaq 100 (EUR hedged)", "iShares Nasdaq 100 Hedged"),
-    "ZPRS.DE": ("MSCI World Small Cap", "Vanguard Global Small-Cap (proxy)"),
-    "VHYL.AS": ("FTSE All-World High Div", "Vanguard FTSE All-World High Div Yield"),
-    "PPFB.DE": ("Oro", "iShares Physical Gold ETC"),
-    "BTC-EUR": ("Bitcoin", "Bitcoin, iShares Bitcoin ETP"),
-    "TTWO":    ("Take-Two (USD)", "Take-Two"),
-}
+# Cada activo: (nombre, posiciones que representa, ticker para alertas, ticker para resumen)
+# - Alertas: ETF que cotiza en tiempo real, para detectar el mínimo el mismo día.
+# - Resumen: tu fondo real (valor liquidativo diario); el domingo el retraso no importa.
+ACTIVOS = [
+    ("Developed World (MSCI World)", "Developed World S/D, MSCI World P, Amundi Core World, MyInvestor Indexado Global PP",
+                                       "EUNL.DE",      "0P0001XF40.F"),
+    ("Emerging Markets",              "iShares EM Index S, Index MSCI EM",
+                                       "EUNM.DE",      "0P0001XF3Z.F"),
+    ("EE. UU.",                       "iShares US Index S, iShares Core S&P 500",
+                                       "SXR8.DE",      "0P0001XF42.F"),
+    ("Nasdaq 100 (EUR hedged)",       "iShares Nasdaq 100 Hedged",
+                                       "NQSE.DE",      "NQSE.DE"),
+    ("Polar Capital Global Tech",     "Polar Capital Global Tech R EUR Hdg",
+                                       "0P0001ANEI.F", "0P0001ANEI.F"),  # fondo activo: sin ETF homólogo
+    ("Global Small-Cap",              "Vanguard Global Small-Cap Index",
+                                       "IUSN.DE",      "0P00012I66.F"),
+    ("FTSE All-World High Div",       "Vanguard FTSE All-World High Div Yield",
+                                       "VHYL.AS",      "VHYL.AS"),
+    ("Oro (USD)",                     "iShares Physical Gold ETC",
+                                       "IGLN.L",       "IGLN.L"),
+    ("Bitcoin",                       "Bitcoin, iShares Bitcoin ETP",
+                                       "BTC-EUR",      "BTC-EUR"),
+    ("Take-Two (USD)",                "Take-Two",
+                                       "TTWO",         "TTWO"),
+]
 
 
 def cargar(ticker):
@@ -107,14 +120,15 @@ def enviar(texto):
 
 def recoger():
     datos, avisos = [], []
-    for ticker, (nombre, cubre) in ACTIVOS.items():
+    for nombre, cubre, t_alerta, t_resumen in ACTIVOS:
+        ticker = t_resumen if MODO == "resumen" else t_alerta
         try:
             hist = cargar(ticker)
             datos.append((ticker, nombre, cubre, hist, metricas(hist)))
-            print(f"{ticker:10} ok")
+            print(f"{ticker:13} ok")
         except Exception as e:  # un ticker caído no debe tumbar el resto
             avisos.append(f"{ticker}: {e}")
-            print(f"{ticker:10} ERROR {e}")
+            print(f"{ticker:13} ERROR {e}")
     return datos, avisos
 
 
@@ -123,7 +137,7 @@ def modo_alertas(datos, avisos):
     for ticker, nombre, cubre, hist, m in datos:
         nivel = nivel_minimo(hist, m)
         if nivel:
-            print(f"{ticker:10} ALERTA {nivel}")
+            print(f"{ticker:13} ALERTA {nivel}")
             alertas.append(
                 f"📉 <b>{html.escape(nombre)}</b> (<code>{ticker}</code>)\n"
                 f"   {nivel} — precio {m['precio']:.2f} el {m['fecha']:%d/%m/%Y}\n"
