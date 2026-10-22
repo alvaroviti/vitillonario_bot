@@ -45,8 +45,8 @@ ACTIVOS = [
                                        "NQSE.DE",      "NQSE.DE"),
     ("Polar Capital Global Tech",     "Polar Capital Global Tech R EUR Hdg",
                                        "0P0001ANEI.F", "0P0001ANEI.F"),  # fondo activo: sin ETF homólogo
-    ("Robeco BP Global Premium Equities", "Robeco BP Global Premium Equities D EUR",
-                                       "LU0203975437.SG", "LU0203975437.SG"),  # fondo activo: sin ETF homólogo
+    ("DIP Paradigma Value Catalyst",  "DIP - Paradigma Value Catalyst Eq A EUR Acc",
+                                       "0P0001NLM6.F", "0P0001NLM6.F"),  # fondo activo: sin ETF homólogo
     ("Global Small-Cap",              "Vanguard Global Small-Cap Index",
                                        "IUSN.DE",      "0P00012I66.F"),
     ("FTSE All-World High Div",       "Vanguard FTSE All-World High Div Yield",
