@@ -14,6 +14,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 import warnings
+import html
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*inplace.*")
 
@@ -23,7 +24,7 @@ TG_CHAT = os.getenv("TELEGRAM_CHAT_ID")
 
 # De mayor a menor: si es mínimo de 12M también lo es de 6M y 3M, se informa el mayor
 VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
-UMBRAL_CERCA = 0.50    # avisar si está a menos de un 2 % del mínimo de 12 meses
+UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
 
 # ticker de Yahoo Finance -> (exposición, posiciones que representa)
@@ -102,10 +103,10 @@ def main():
             avisos.append(aviso)
         if res:
             alertas.append(
-                f"📉 {nombre} ({res['ticker']})\n"
+                f"📉 <b>{html.escape(nombre)}</b> (<code>{res['ticker']}</code>)\n"
                 f"   {res['nivel']} — cierre {res['precio']:.2f} el {res['fecha']}\n"
                 f"   Desde máximo 12M: {res['caida']:.1%}\n"
-                f"   Afecta a: {cubre}"
+                f"   Afecta a: {html.escape(cubre)}"
             )
         print(f"{ticker:10} {'ALERTA' if res else 'ok'} {aviso or ''}")
 
