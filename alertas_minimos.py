@@ -60,8 +60,10 @@ def metricas(hist):
     precio = float(hist.iloc[-1])
     anual = hist[hist.index >= fecha - timedelta(days=365)]
     min12, max12 = float(anual.min()), float(anual.max())
-    hace_semana = hist[hist.index <= fecha - timedelta(days=7)]
-    var_sem = precio / float(hace_semana.iloc[-1]) - 1 if not hace_semana.empty else None
+    def variacion(dias):
+        previo = hist[hist.index <= fecha - timedelta(days=dias)]
+        return precio / float(previo.iloc[-1]) - 1 if not previo.empty else None
+
     rango = (precio - min12) / (max12 - min12) if max12 > min12 else 1.0
     return {
         "fecha": fecha,
@@ -70,7 +72,8 @@ def metricas(hist):
         "max12": max12,
         "vs_min": precio / min12 - 1,
         "vs_max": precio / max12 - 1,
-        "var_sem": var_sem,
+        "var_sem": variacion(7),
+        "var_mes": variacion(30),
         "rango": rango,
     }
 
@@ -85,7 +88,7 @@ def nivel_minimo(hist, m):
     return None
 
 
-def barra(rango, ancho=10):
+def barra(rango, ancho=16):
     llenos = round(max(0.0, min(1.0, rango)) * ancho)
     return "▓" * llenos + "░" * (ancho - llenos)
 
@@ -141,10 +144,12 @@ def modo_resumen(datos, avisos):
     datos = sorted(datos, key=lambda d: d[4]["vs_max"])
     bloques = []
     for ticker, nombre, _, _, m in datos:
-        sem = f"{m['var_sem']:+.1%}" if m["var_sem"] is not None else "n/d"
+        fmt = lambda v: f"{v:+.1%}" if v is not None else "n/d"
         bloques.append(
             f"<b>{html.escape(nombre)}</b> (<code>{ticker}</code>) {m['precio']:.2f}\n"
-            f"   Semana: {sem} · vs máx 12M: {m['vs_max']:+.1%} · vs mín 12M: {m['vs_min']:+.1%}\n"
+            f"   Semana: {fmt(m['var_sem'])}\n"
+            f"   Mes: {fmt(m['var_mes'])}\n"
+            f"   vs máx 12M: {m['vs_max']:+.1%} · vs mín 12M: {m['vs_min']:+.1%}\n"
             f"   mín {barra(m['rango'])} máx"
         )
     texto = "<b>📊 Resumen semanal</b>\n<i>Ordenado de más a menos caída desde el máximo anual</i>\n\n"
