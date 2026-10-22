@@ -115,7 +115,7 @@ def nivel_minimo(hist, m):
     return None
 
 
-def barra(rango, ancho=16):
+def barra(rango, ancho=20):
     llenos = round(max(0.0, min(1.0, rango)) * ancho)
     return "▓" * llenos + "░" * (ancho - llenos)
 
