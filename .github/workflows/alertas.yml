@@ -2,6 +2,7 @@ name: Alertas de minimos
 
 on:
   schedule:
+    - cron: "30 15 * * 1-5"  # 16:30 hora española (invierno), de lunes a viernes
     - cron: "0 19 * * *"   # todos los días a las 19:00 UTC (tras el cierre europeo)
   workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
 
