@@ -2,9 +2,16 @@ name: Alertas de minimos
 
 on:
   schedule:
-    - cron: "30 15 * * 1-5"  # 16:30 hora española (invierno), de lunes a viernes
-    - cron: "0 19 * * *"   # todos los días a las 19:00 UTC (tras el cierre europeo)
-  workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
+    - cron: "30 15 * * 1-5"  # alertas 16:30 hora española (invierno), lunes a viernes
+    - cron: "0 19 * * *"     # alertas 20:00 hora española (invierno), todos los días
+    - cron: "0 11 * * 0"     # resumen semanal, domingo 12:00 hora española (invierno)
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "Qué ejecutar"
+        type: choice
+        options: [alertas, resumen]
+        default: alertas
 
 jobs:
   alertas:
@@ -19,3 +26,4 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MODO: ${{ github.event.inputs.modo || (github.event.schedule == '0 11 * * 0' && 'resumen') || 'alertas' }}
