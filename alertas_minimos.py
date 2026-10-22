@@ -45,6 +45,8 @@ ACTIVOS = [
                                        "NQSE.DE",      "NQSE.DE"),
     ("Polar Capital Global Tech",     "Polar Capital Global Tech R EUR Hdg",
                                        "0P0001ANEI.F", "0P0001ANEI.F"),  # fondo activo: sin ETF homólogo
+    ("Robeco BP Global Premium Equities", "Robeco BP Global Premium Equities D EUR",
+                                       "LU0203975437.SG", "LU0203975437.SG"),  # fondo activo: sin ETF homólogo
     ("Global Small-Cap",              "Vanguard Global Small-Cap Index",
                                        "IUSN.DE",      "0P00012I66.F"),
     ("FTSE All-World High Div",       "Vanguard FTSE All-World High Div Yield",
@@ -152,10 +154,10 @@ def recoger():
         try:
             hist = cargar(ticker)
             datos.append((ticker, nombre, cubre, hist, metricas(hist)))
-            print(f"{ticker:13} ok")
+            print(f"{ticker:16} ok")
         except Exception as e:  # un ticker caído no debe tumbar el resto
             avisos.append(f"{ticker}: {e}")
-            print(f"{ticker:13} ERROR {e}")
+            print(f"{ticker:16} ERROR {e}")
     return datos, avisos
 
 
@@ -164,7 +166,7 @@ def modo_alertas(datos, avisos):
     for ticker, nombre, cubre, hist, m in datos:
         nivel = nivel_minimo(hist, m)
         if nivel:
-            print(f"{ticker:13} ALERTA {nivel}")
+            print(f"{ticker:16} ALERTA {nivel}")
             alertas.append(
                 f"📉 <b>{html.escape(nombre)}</b> (<code>{ticker}</code>)\n"
                 f"   {nivel} — precio {m['precio']:.2f} el {m['fecha']:%d/%m/%Y}\n"
