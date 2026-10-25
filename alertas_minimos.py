@@ -28,7 +28,7 @@ TG_CHAT = os.getenv("TELEGRAM_CHAT_ID")
 # De mayor a menor: si es mínimo de 12M también lo es de 6M y 3M, se informa el mayor
 VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
 UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
-HORIZONTES = [("3 meses", 91), ("6 meses", 182), ("1 año", 365), ("2 años", 730), ("3 años", 1095)]
+HORIZONTES = [("3 meses", 91), ("6 meses", 182), ("1 año", 365), ("2 años", 730), ("3 años", 1095), ("4 años", 1460)]
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
 
 # Cada activo: (nombre, posiciones que representa, ticker para alertas, ticker para resumen)
@@ -61,7 +61,7 @@ ACTIVOS = [
 
 
 def cargar(ticker):
-    hist = yf.Ticker(ticker).history(period="37mo", interval="1d", auto_adjust=True)["Close"].dropna()
+    hist = yf.Ticker(ticker).history(period="49mo", interval="1d", auto_adjust=True)["Close"].dropna()
     if hist.empty:
         raise ValueError("sin datos")
     ultima = hist.index[-1]
