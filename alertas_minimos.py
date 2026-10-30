@@ -49,6 +49,8 @@ ACTIVOS = [
                                        "0P0001NLM6.F", "0P0001NLM6.F"),  # fondo activo: sin ETF homólogo
     ("Global Small-Cap",              "Vanguard Global Small-Cap Index",
                                        "IUSN.DE",      "0P00012I66.F"),
+    ("Dev. Markets Dividend Leaders", "Seguimiento (sin posición): VanEck Morningstar Dev. Markets Dividend Leaders",
+                                       "TDIV.AS",      "TDIV.AS"),
     ("FTSE All-World High Div",       "Vanguard FTSE All-World High Div Yield",
                                        "VHYL.AS",      "VHYL.AS"),
     ("Oro (USD)",                     "iShares Physical Gold ETC",
