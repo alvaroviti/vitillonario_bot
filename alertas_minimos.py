@@ -30,7 +30,7 @@ VENTANAS = [("12 meses", 365), ("6 meses", 182), ("3 meses", 91)]
 UMBRAL_CERCA = 0.02    # avisar si está a menos de un 2 % del mínimo de 12 meses
 HORIZONTES = [("3 meses", 91), ("6 meses", 182), ("1 año", 365), ("2 años", 730), ("3 años", 1095), ("4 años", 1460)]
 MAX_DIAS_SIN_DATO = 5  # descartar si el último dato es demasiado antiguo
-USD_A_EUR = {"TTWO", "IGLN.L", "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA"}  # cotizan en USD: se convierten a EUR con EURUSD=X
+USD_A_EUR = {"IGLN.L", "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA"}  # cotizan en USD: se convierten a EUR con EURUSD=X
 
 # Cada activo: (nombre, posiciones que representa, ticker para alertas, ticker para resumen)
 # Si el ticker de alertas es None, el activo solo aparece en el resumen.
@@ -73,8 +73,6 @@ ACTIVOS = [
                                        "META",         "META"),
     ("Tesla (EUR)",                  "Seguimiento (sin posición): Magnificent 7",
                                        "TSLA",         "TSLA"),
-    ("Take-Two (EUR)",                "Take-Two",
-                                       None,           "TTWO"),  # sin alertas, solo en el resumen
 ]
 
 
